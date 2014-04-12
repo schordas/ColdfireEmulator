@@ -119,8 +119,8 @@ ADDI:
 	add.l d2, d5
 	mulu #32, d3
 	add.l d3, a4
-	//clr.l d2
 	move.l d5, (a4)//pulls value of rt register
+	movea.l a3, a4
 	clr.l d1
 	clr.l d2
 	clr.l d3
