@@ -46,32 +46,88 @@ INIT:
 	
 DECODE:
 	clr.l d0
-	
-	move.l (a1), d0
-	move.l d0, d1
-	move.l d0, d2
-	move.l d0, d3
-	move.l d0, d4
-	move.l d0, d5
-	lsr.l #26, d1 //this is opcode
-	lsr.l #23, d2 //rs
-	lsl.l #6, d2
-	lsr.l #20, d3 //rt
-	lsl.l #9, d3
-	lsr.l #17, d4 //rd
-	lsl.l #12, d4
-	lsl.l #18, d5 //imm
-	lsr.l #18, d5
+	jsr LOADINST  
 	cmp.l #0x1, d1
 	beq ADD	
+	cmp.l #0x2, d1
+	beq ADDI
 	//d0 will be entire line
 	//d1 - opcode
 	//d2 - rs
 	//d3 - rt
 	//d4 - immediate
+LOADINST:
+	move.l (a1)+, d0
+	move.l d0, d1
+	move.l d0, d2
+	move.l d0, d3
+	move.l d0, d4
+	move.l d0, d5
+	lsr.l #8, d1 //this is opcode
+	lsr.l #8, d1
+	lsr.l #8, d1
+	lsr.l #2, d1
+	lsr.l #8, d2 //rs
+	lsr.l #8, d2
+	lsr.l #8, d2
+	lsl.l #6, d2
+	lsr.l #8, d3 //rt
+	lsr.l #8, d3
+	lsr.l #4, d3
+	lsl.l #8, d3
+	lsl.l #1, d3
+	lsr.l #8, d4 //rd
+	lsr.l #8, d4
+	lsr.l #1, d4
+	lsl.l #8, d4
+	lsl.l #4, d4
+	lsl.l #8, d5 //imm
+	lsl.l #8, d5
+	lsl.l #2, d5
+	lsr.l #8, d5
+	lsr.l #8, d5
+	lsr.l #2, d5
+	rts
 ADD:
-	
+	clr.l d6
+	mulu #32, d2 
+	add.l d2, a4 
+	move.l (a4), d6//pulls value of rs register
+	movea.l a3, a4
+	mulu #32, d3
+	add.l d3, a4
+	move.l (a4), d2//pulls value of rt register
+	movea.l a3, a4
+	mulu #32, d4
+	add.l d4, a4
+	add.l d6, d2
+	move.l d2, (a4)//saves sum in rd register
+	movea.l a3, a4
+	clr.l d1
+	clr.l d2
+	clr.l d3
+	clr.l d4
+	clr.l d5
+	clr.l d6
+	bra DECODE
 ADDI:
+	clr.l d6
+	mulu #32, d2 
+	add.l d2, a4 
+	move.l (a4), d6//pulls value of rs register
+	movea.l a3, a4
+	add.l d2, d5
+	mulu #32, d3
+	add.l d3, a4
+	//clr.l d2
+	move.l d5, (a4)//pulls value of rt register
+	clr.l d1
+	clr.l d2
+	clr.l d3
+	clr.l d4
+	clr.l d5
+	clr.l d6
+	bra DECODE
 LOAD:
 BE:
 BNE:
