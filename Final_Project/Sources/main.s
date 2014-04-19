@@ -20,24 +20,6 @@ main:
 	// Initial value 0000 for the LED's:
 	move.l #0x0,d1
 	move.b d1,0x4010000F
-	
-	// Initial values for temp regs, a2 = 1, a3 = 0
-	// d1 = y(i), a2 = y(i-1), a3 = temp
-	//move.l #0x1,a2
-	//move.l #0x0,a3
-	
-	
-	/* Initialize the Switches. */
-	//move.l #0x0,d3
-	//move.b d3,0x40100074 // Set pins to be used GPIO.
-	//move.l #0x00000000,d3
-	//move.b d3,0x4010002C // Set Switches as input.
-
-	// Register for Switches:
-	//move.l #0x0,d5
-	//move.l d5,0x40100044
-	//move.l #16,a5
-	//move.l a5,0x40100044
 
 INIT:
 	//a0 for starting address
@@ -96,7 +78,7 @@ LOADINST:
 	lsr.l #8, d1
 	lsr.l #8, d1
 	lsr.l #2, d1
-	lsl.l #6, d2 //rs
+	lsl.l #6, d2 //rs (rt for READS)
 	lsr.l #8, d2
 	lsr.l #8, d2
 	lsr.l #8, d2
@@ -154,6 +136,7 @@ ADDI:
 	add.l d3, a4
 	//clr.l d2
 	move.l d4, (a4)//pulls value of rt register
+	movea.l a3, a4
 	clr.l d1
 	clr.l d2
 	clr.l d3
@@ -180,6 +163,7 @@ BE:
 		clr.l d4
 		clr.l d5
 		clr.l d6
+		movea.l a3, a4
 		bra DECODE
 BNE:
 	clr.l d6
@@ -200,6 +184,7 @@ EQUAL:
 		clr.l d4
 		clr.l d5
 		clr.l d6
+		movea.l a3, a4
 		bra DECODE
 SUBI:
 	clr.l d6
@@ -218,13 +203,39 @@ SUBI:
 	clr.l d4
 	clr.l d5
 	clr.l d6
+	movea.l a3, a4
 	bra DECODE
 READ:
-	
+	clr.l d5
+	move.b 0x40100044, d5 //move switch value into d5
+	lsr.l #4, d5 //bit-shift to get proper value
+	mulu #32, d2
+	add.l d2, a4
+	move.l d5, (a4)
+	clr.l d1
+	clr.l d2
+	clr.l d3
+	clr.l d4
+	clr.l d5
+	clr.l d6
+	movea.l a3, a4
+	bra DECODE	
+
 DIS:
+	move.b d2,0x4010000F // Light up the LED
+	clr.l d1
+	clr.l d2
+	clr.l d3
+	clr.l d4
+	clr.l d5
+	clr.l d6
+	movea.l a3, a4
+	bra DECODE	
 END:
 	bra.s inflp
 
 inflp:	bra.s	inflp
 		rts
+
+
 
