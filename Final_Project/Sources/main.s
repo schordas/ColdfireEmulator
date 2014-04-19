@@ -232,10 +232,7 @@ DIS:
 	movea.l a3, a4
 	bra DECODE	
 END:
-	bra.s inflp
-
-inflp:	bra.s	inflp
-		rts
+	bra.s END
 
 
 
