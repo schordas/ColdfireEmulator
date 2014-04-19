@@ -136,6 +136,7 @@ ADDI:
 	add.l d3, a4
 	//clr.l d2
 	move.l d4, (a4)//pulls value of rt register
+	movea.l a3, a4
 	clr.l d1
 	clr.l d2
 	clr.l d3
@@ -162,6 +163,7 @@ BE:
 		clr.l d4
 		clr.l d5
 		clr.l d6
+		movea.l a3, a4
 		bra DECODE
 BNE:
 	clr.l d6
@@ -182,6 +184,7 @@ EQUAL:
 		clr.l d4
 		clr.l d5
 		clr.l d6
+		movea.l a3, a4
 		bra DECODE
 SUBI:
 	clr.l d6
@@ -200,6 +203,7 @@ SUBI:
 	clr.l d4
 	clr.l d5
 	clr.l d6
+	movea.l a3, a4
 	bra DECODE
 READ:
 	clr.l d5
@@ -214,6 +218,7 @@ READ:
 	clr.l d4
 	clr.l d5
 	clr.l d6
+	movea.l a3, a4
 	bra DECODE	
 DIS:
 	move.b d2,0x4010000F // Light up the LED
@@ -223,6 +228,7 @@ DIS:
 	clr.l d4
 	clr.l d5
 	clr.l d6
+	movea.l a3, a4
 	bra DECODE	
 END:
 	bra.s END
