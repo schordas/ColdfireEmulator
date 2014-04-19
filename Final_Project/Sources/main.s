@@ -220,8 +220,10 @@ SUBI:
 	clr.l d6
 	bra DECODE
 READ:
+	
 DIS:
 END:
+	bra.s inflp
 
 inflp:	bra.s	inflp
 		rts
