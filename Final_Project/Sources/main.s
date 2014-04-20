@@ -54,14 +54,27 @@ INIT:
 	move.l #0x0, (a4)+
 	
 	movea.l a3, a4
+	clr.l d0
 	
 DECODE:
-	clr.l d0
-	jsr LOADINST  
+	bra.s LOADINST
+COMP: 
 	cmp.l #0x1, d1
 	beq ADD	
 	cmp.l #0x2, d1
 	beq ADDI
+	cmp.l #0x4, d1
+	beq BE
+	cmp.l #0x6, d1
+	beq BNE
+	cmp.l #0x8, d1
+	beq SUBI
+	cmp.l #0x30, d1
+	beq READ
+	cmp.l #0x20, d1
+	beq DIS
+	cmp.l #0x0, d1
+	beq END
 	//d0 will be entire line
 	//d1 - opcode
 	//d2 - rs
@@ -99,22 +112,22 @@ LOADINST:
 	//lsr.l #8, d5
 	//lsr.l #8, d5
 	//lsr.l #2, d5
-	rts
+	bra COMP
 ADD:
 	lsr.l #8, d4 //split last 20 bits to extract rd 
 	lsr.l #8, d4
 	lsr.l #1, d4
 	clr.l d6
-	mulu #32, d2 
+	mulu #4, d2 
 	add.l d2, a4 
 	move.l (a4), d6//pulls value of rs register
 	movea.l a3, a4
-	mulu #32, d3
-	add.l d3, a4
+	mulu #4, d4
+	add.l d4, a4
 	move.l (a4), d2//pulls value of rt register
 	movea.l a3, a4
-	mulu #32, d4
-	add.l d4, a4
+	mulu #4, d3
+	add.l d3, a4
 	add.l d6, d2
 	move.l d2, (a4)//saves sum in rd register
 	movea.l a3, a4
@@ -127,12 +140,12 @@ ADD:
 	bra DECODE
 ADDI:
 	clr.l d6
-	mulu #32, d2 
+	mulu #4, d2 
 	add.l d2, a4 
 	move.l (a4), d6//pulls value of rs register
 	movea.l a3, a4
-	add.l d2, d4 //d4 holds immediate value
-	mulu #32, d3
+	add.l d6, d4 //d4 holds immediate value
+	mulu #4, d3
 	add.l d3, a4
 	//clr.l d2
 	move.l d4, (a4)//pulls value of rt register
@@ -146,11 +159,11 @@ ADDI:
 	bra DECODE
 BE:
 	clr.l d6
-	mulu #32, d2
+	mulu #4, d2
 	add.l d2, a4
 	move.l (a4), d6 //pulls value of rs register
 	movea.l a3, a4
-	mulu #32, d3
+	mulu #4, d3
 	add.l d3, a4
 	move.l (a4), d2
 	cmp.l d2, d6
@@ -167,11 +180,11 @@ BE:
 		bra DECODE
 BNE:
 	clr.l d6
-	mulu #32, d2
+	mulu #4, d2
 	add.l d2, a4
 	move.l (a4), d6 //pulls value of rs register
 	movea.l a3, a4
-	mulu #32, d3
+	mulu #4, d3
 	add.l d3, a4
 	move.l (a4), d2
 	cmp.l d2, d6
@@ -188,15 +201,15 @@ EQUAL:
 		bra DECODE
 SUBI:
 	clr.l d6
-	mulu #32, d2 
+	mulu #4, d2 
 	add.l d2, a4 
 	move.l (a4), d6//pulls value of rs register
 	movea.l a3, a4
-	sub.l d2, d4 //d4 holds immediate value
-	mulu #32, d3
+	sub.l d4, d6 //d4 holds immediate value
+	mulu #4, d3
 	add.l d3, a4
 	//clr.l d2
-	move.l d4, (a4)//pulls value of rt register
+	move.l d6, (a4)//pulls value of rt register
 	clr.l d1
 	clr.l d2
 	clr.l d3
@@ -209,7 +222,7 @@ READ:
 	clr.l d5
 	move.b 0x40100044, d5 //move switch value into d5
 	lsr.l #4, d5 //bit-shift to get proper value
-	mulu #32, d2
+	mulu #4, d2
 	add.l d2, a4
 	move.l d5, (a4)
 	clr.l d1
@@ -232,10 +245,5 @@ DIS:
 	movea.l a3, a4
 	bra DECODE	
 END:
-	bra.s inflp
-
-inflp:	bra.s	inflp
-		rts
-
-
+	bra.s END
 
