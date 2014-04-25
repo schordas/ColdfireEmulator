@@ -33,9 +33,9 @@ INIT:
 	move.l #0xC3000000, (a1)+
 	move.l #0x0840000A, (a1)+
 	move.l #0x12600008, (a1)+
-	move.l #0x052C0000, (a1)+
+	move.l #0x05640000, (a1)+
 	move.l #0x20900001, (a1)+
-	move.l #0x181FFFF8, (a1)+
+	move.l #0x1810000C, (a1)+ //Need to subtract the 2's complement
 	move.l #0x81000001, (a1)+
 	move.l #0x00900001, (a1)+
 	//return a1 to bottom of stack
@@ -86,7 +86,7 @@ LOADINST:
 	move.l d0, d2
 	move.l d0, d3
 	move.l d0, d4
-	move.l d0, d5
+	//move.l d0, d5
 	lsr.l #8, d1 //this is opcode
 	lsr.l #8, d1
 	lsr.l #8, d1
@@ -122,12 +122,12 @@ ADD:
 	add.l d2, a4 
 	move.l (a4), d6//pulls value of rs register
 	movea.l a3, a4
-	mulu #4, d4
-	add.l d4, a4
-	move.l (a4), d2//pulls value of rt register
-	movea.l a3, a4
 	mulu #4, d3
 	add.l d3, a4
+	move.l (a4), d2//pulls value of rt register
+	movea.l a3, a4
+	mulu #4, d4
+	add.l d4, a4
 	add.l d6, d2
 	move.l d2, (a4)//saves sum in rd register
 	movea.l a3, a4
@@ -168,7 +168,8 @@ BE:
 	move.l (a4), d2
 	cmp.l d2, d6
 	bne NOTEQ
-	add.l d4, a1	
+	subq.l #4, a1 //first subtract 4 due to (a1)+ (autoincrement)
+	add.l d4, a1
 	NOTEQ:
 		clr.l d1
 		clr.l d2
@@ -189,7 +190,8 @@ BNE:
 	move.l (a4), d2
 	cmp.l d2, d6
 	beq EQUAL
-	add.l d4, a1	
+	sub.l d4, a1
+	subq.l #4, a1 //subtract an additional 4 due to (a1)+ (autoincrement)	
 EQUAL:
 		clr.l d1
 		clr.l d2
@@ -235,7 +237,11 @@ READ:
 	bra DECODE	
 
 DIS:
-	move.b d2,0x4010000F // Light up the LED
+	clr.l d6
+	mulu #4, d2
+	add.l d2, a4
+	move.l (a4), d6 //pulls value of rs register
+	move.b d6,0x4010000F // Light up the LED
 	clr.l d1
 	clr.l d2
 	clr.l d3
